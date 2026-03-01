@@ -1,155 +1,69 @@
---[[
-    LYNX ADVANCED WARFARE SYSTEM (AWS) v1.2.4
-    Developed for: red_wolf12370
-    Target: Universal FPS / Roblox Mobile (Delta/Fluxus)
-    
-    GitHub: https://github.com/red-wolf12370/Lynx-AWS
---]]
+-- LYNX AWS - Floating Version
+-- User: red_wolf12370
 
-local LYNX_VERSION = "1.2.4"
-local USER_TAG = "red_wolf12370"
-
--- Services
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
+local UserInputService = game:GetService("UserInputService")
 
--- Configuration State
-local CFG = {
-    Aimbot = {
-        Enabled = false,
-        Silent = false,
-        Method = "Linear", -- Linear | Exponential
-        Speed = 0.25,
-        Smoothing = 0.4,
-        Prediction = 0.12,
-        FOV = 100,
-        VisibleCheck = true
-    },
-    Visuals = {
-        ESP_Enabled = false,
-        Boxes = true,
-        Names = true,
-        Distance = true,
-        Color = Color3.fromRGB(255, 50, 50)
-    },
-    Movement = {
-        WalkSpeed = 16,
-        SpeedEnabled = false,
-        InfJump = false
-    },
-    MenuKey = Enum.KeyCode.RightShift
-}
+local sgui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
+sgui.Name = "Lynx_Mobile_Hub"
+sgui.ResetOnSpawn = false
 
--- [ UTILS ]
-local function GetCharacter(plr) return plr and plr.Character end
-local function IsAlive(plr) 
-    local char = GetCharacter(plr)
-    return char and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 
-end
+-- Janela Principal (Main Frame)
+local Main = Instance.new("Frame", sgui)
+Main.Size = UDim2.new(0, 400, 0, 250)
+Main.Position = UDim2.new(0.5, -200, 0.5, -125)
+Main.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+Main.Visible = false -- Começa invisível
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 
--- [ AIMBOT CORE ]
-local function GetClosestPlayer()
-    local target = nil
-    local dist = CFG.Aimbot.FOV
-    local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Text = "LYNX AWS"
+Title.TextColor3 = Color3.fromRGB(255, 50, 50)
+Title.Font = Enum.Font.GothamBold
+Title.BackgroundTransparency = 1
 
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and IsAlive(p) then
-            local char = GetCharacter(p)
-            local part = char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart")
-            if part then
-                local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
-                if onScreen then
-                    local mag = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
-                    if mag < dist then
-                        dist = mag
-                        target = p
-                    end
-                end
-            end
-        end
-    end
-    return target
-end
+-- =============================================
+-- BOLINHA FLUTUANTE (FLOATING ICON)
+-- =============================================
+local FloatingBtn = Instance.new("TextButton", sgui)
+FloatingBtn.Name = "WolfIcon"
+FloatingBtn.Size = UDim2.new(0, 50, 0, 50)
+FloatingBtn.Position = UDim2.new(0.1, 0, 0.5, 0)
+FloatingBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+FloatingBtn.Text = "🐺" -- O Lobo que você pediu
+FloatingBtn.TextSize = 30
+FloatingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", FloatingBtn).CornerRadius = UDim.new(1, 0)
+local Stroke = Instance.new("UIStroke", FloatingBtn)
+Stroke.Color = Color3.fromRGB(255, 50, 50)
+Stroke.Thickness = 2
 
--- [ MAIN LOOP ]
-RunService.RenderStepped:Connect(function(dt)
-    -- Aimbot Logic
-    if CFG.Aimbot.Enabled and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
-        local target = GetClosestPlayer()
-        if target then
-            local char = GetCharacter(target)
-            local part = char:FindFirstChild("Head")
-            if part then
-                local targetPos = part.Position
-                if CFG.Aimbot.Prediction > 0 then
-                    targetPos = targetPos + (part.Velocity * CFG.Aimbot.Prediction)
-                end
-                
-                local targetCF = CFrame.new(Camera.CFrame.Position, targetPos)
-                local lerpSpeed = math.clamp(1 - CFG.Aimbot.Smoothing, 0.05, 1) * CFG.Aimbot.Speed
-                Camera.CFrame = Camera.CFrame:Lerp(targetCF, lerpSpeed)
-            end
-        end
-    end
-
-    -- Movement Logic
-    local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if hum then
-        hum.WalkSpeed = CFG.Movement.SpeedEnabled and CFG.Movement.WalkSpeed or 16
+-- Tornar a bolinha arrastável (Draggable)
+local dragging, dragStart, startPos
+FloatingBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = FloatingBtn.Position
     end
 end)
 
--- [ UI BUILDER - MOBILE FRIENDLY ]
-local function CreateUI()
-    local sgui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
-    sgui.Name = "LynxAWS_UI"
-    sgui.ResetOnSpawn = false
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        FloatingBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
 
-    local main = Instance.new("Frame", sgui)
-    main.Size = UDim2.new(0, 550, 0, 350)
-    main.Position = UDim2.new(0.5, -275, 0.5, -175)
-    main.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
-    main.BorderSizePixel = 0
-    main.Active = true
-    main.Draggable = true -- Essencial para Mobile/Delta
-    
-    Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
-    Instance.new("UIStroke", main).Color = Color3.fromRGB(45, 45, 55)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
 
-    -- Sidebar
-    local sidebar = Instance.new("Frame", main)
-    sidebar.Size = UDim2.new(0, 140, 1, 0)
-    sidebar.BackgroundColor3 = Color3.fromRGB(12, 12, 15)
-    sidebar.BorderSizePixel = 0
-    Instance.new("UICorner", sidebar).CornerRadius = UDim.new(0, 10)
-
-    local title = Instance.new("TextLabel", sidebar)
-    title.Size = UDim2.new(1, 0, 0, 40)
-    title.Text = "LYNX AWS"
-    title.TextColor3 = Color3.fromRGB(255, 60, 60)
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = 16
-    title.BackgroundTransparency = 1
-
-    local footer = Instance.new("TextLabel", sidebar)
-    footer.Size = UDim2.new(1, 0, 0, 30)
-    footer.Position = UDim2.new(0, 0, 1, -30)
-    footer.Text = USER_TAG
-    footer.TextColor3 = Color3.fromRGB(80, 80, 90)
-    footer.Font = Enum.Font.Gotham
-    footer.TextSize = 10
-    footer.BackgroundTransparency = 1
-
-    print("[LYNX AWS] Sucesso: Interface carregada para " .. USER_TAG)
-end
-
--- Init
-if not _G.LynxLoaded then
-    _G.LynxLoaded = true
-    CreateUI()
-end
+-- Função de Abrir/Fechar
+FloatingBtn.MouseButton1Click:Connect(function()
+    Main.Visible = not Main.Visible
+end)
