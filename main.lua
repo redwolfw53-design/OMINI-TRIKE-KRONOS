@@ -1,98 +1,107 @@
-
--- [[ 👑 KRONOS PROJECT 4.0 | V54 BYPASS TOTAL ]] --
+-- [[ 👑 KRONOS PROJECT 4.0 | V54 STABLE ]] --
 -- Dono: ryan_ejsjseke (red_wolf12370)
--- VERSÃO SEM LIBRARIES EXTERNAS (PARA NÃO DAR ERRO 261)
+-- Key: kronosPt4.4
 
--- // 🛡️ REMOVE QUALQUER TRAVA DE CONEXÃO //
-local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local ToggleAimbot = Instance.new("TextButton")
-local ToggleSpeed = Instance.new("TextButton")
-local Credito = Instance.new("TextLabel")
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- Configuração da UI Simples (Nativa do Roblox, o jogo não bloqueia)
-ScreenGui.Name = "KronosBypass"
-ScreenGui.Parent = game.CoreGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+local Window = Rayfield:CreateWindow({
+   Name = "👑 KRONOS V54 | WOLF-STRIKE",
+   LoadingTitle = "BY RYAN_EJSJSEKE...",
+   ConfigurationSaving = {Enabled = true, FolderName = "KronosWolf", FileName = "Config"},
+   KeySystem = true,
+   KeySettings = {
+      Title = "🔑 SISTEMA DE ACESSO",
+      Subtitle = "Discord: ZsQbTbhzPB",
+      Note = "Criado por ryan_ejsjseke",
+      FileName = "KronosKey",
+      SaveKey = true,
+      Key = {"kronosPt4.4"} 
+   }
+})
 
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-MainFrame.Position = UDim2.new(0.4, 0, 0.4, 0)
-MainFrame.Size = UDim2.new(0, 200, 0, 250)
-MainFrame.Active = true
-MainFrame.Draggable = true -- Você pode arrastar na tela
+-- // 🎯 CONFIGURAÇÕES //
+_G.SilentAim = false
+_G.Wallshot = false
+_G.NoRecoil = false
+_G.SpeedEnabled = false
+_G.SpeedValue = 16
+_G.FOV = 150
+_G.ShowFOV = true
+_G.EspEnabled = false
 
-Title.Parent = MainFrame
-Title.Text = "👑 KRONOS V54"
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+-- // 📐 FOV DRAWING (CIRCULO PRETO) //
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Thickness = 2
+FOVCircle.Color = Color3.fromRGB(0, 0, 0)
+FOVCircle.Filled = false
+FOVCircle.Transparency = 1
 
--- Botão Aimbot
-ToggleAimbot.Parent = MainFrame
-ToggleAimbot.Position = UDim2.new(0.1, 0, 0.25, 0)
-ToggleAimbot.Size = UDim2.new(0.8, 0, 0, 40)
-ToggleAimbot.Text = "Silent Aim: OFF"
-ToggleAimbot.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
-ToggleAimbot.TextColor3 = Color3.fromRGB(255, 255, 255)
+-- // 📋 ABA: COMBATE //
+local Tab1 = Window:CreateTab("🎯 Combate")
+Tab1:CreateSection("Funções de Tiro")
+Tab1:CreateToggle({Name = "🔴 Silent Aim", CurrentValue = false, Callback = function(v) _G.SilentAim = v end})
+Tab1:CreateToggle({Name = "🧱 Wallshot", CurrentValue = false, Callback = function(v) _G.Wallshot = v end})
+Tab1:CreateToggle({Name = "🚫 No Recoil", CurrentValue = false, Callback = function(v) _G.NoRecoil = v end})
+Tab1:CreateToggle({Name = "⭕ Mostrar FOV Preto", CurrentValue = true, Callback = function(v) _G.ShowFOV = v end})
+Tab1:CreateSlider({Name = "📐 Tamanho FOV", Min = 50, Max = 800, Default = 150, Callback = function(v) _G.FOV = v end})
 
--- Botão Speed
-ToggleSpeed.Parent = MainFrame
-ToggleSpeed.Position = UDim2.new(0.1, 0, 0.45, 0)
-ToggleSpeed.Size = UDim2.new(0.8, 0, 0, 40)
-ToggleSpeed.Text = "Speed: OFF"
-ToggleSpeed.BackgroundColor3 = Color3.fromRGB(60, 60, 0)
+-- // 👁️ ABA: VISUAL //
+local Tab2 = Window:CreateTab("👁️ Visual")
+Tab2:CreateToggle({Name = "👥 ESP Box (Linhas)", CurrentValue = false, Callback = function(v) _G.EspEnabled = v end})
 
-Credito.Parent = MainFrame
-Credito.Position = UDim2.new(0, 0, 0.85, 0)
-Credito.Size = UDim2.new(1, 0, 0, 30)
-Credito.Text = "Por: ryan_ejsjseke"
-Credito.TextColor3 = Color3.fromRGB(150, 150, 150)
-Credito.BackgroundTransparency = 1
+-- // 🏃 ABA: MOVIMENTO //
+local Tab3 = Window:CreateTab("🏃 Movimento")
+Tab3:CreateToggle({Name = "⚡ Speed Hack", CurrentValue = false, Callback = function(v) _G.SpeedEnabled = v end})
+Tab3:CreateSlider({Name = "💨 Velocidade", Min = 16, Max = 250, Default = 50, Callback = function(v) _G.SpeedValue = v end})
 
--- // 🎯 FUNÇÕES LITE (SEM METATABLE) //
-_G.Silent = false
-_G.Spd = false
+-- // 👑 ABA: CRÉDITOS //
+local Tab4 = Window:CreateTab("👑 Créditos")
+Tab4:CreateLabel("Dono: ryan_ejsjseke (red_wolf12370)")
+Tab4:CreateButton({Name = "🔗 Copiar Discord", Callback = function() setclipboard("https://discord.gg/ZsQbTbhzPB") end})
 
-ToggleAimbot.MouseButton1Click:Connect(function()
-    _G.Silent = not _G.Silent
-    ToggleAimbot.Text = _G.Silent and "Silent Aim: ON" or "Silent Aim: OFF"
-    ToggleAimbot.BackgroundColor3 = _G.Silent and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(60, 0, 0)
-end)
-
-ToggleSpeed.MouseButton1Click:Connect(function()
-    _G.Spd = not _G.Spd
-    ToggleSpeed.Text = _G.Spd and "Speed: ON" or "Speed: OFF"
-    ToggleSpeed.BackgroundColor3 = _G.Spd and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(60, 60, 0)
-end)
-
--- Motor do Script
-game:GetService("RunService").RenderStepped:Connect(function()
-    if _G.Silent and game:GetService("UserInputService"):IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-        -- Aimbot de Câmera (Invisível pro Anti-Cheat)
-        local target = nil
-        local dist = 200
-        for _, v in pairs(game.Players:GetPlayers()) do
-            if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
-                local pos, vis = game.Workspace.CurrentCamera:WorldToScreenPoint(v.Character.Head.Position)
-                if vis then
-                    local mDist = (Vector2.new(pos.X, pos.Y) - game:GetService("UserInputService"):GetMouseLocation()).Magnitude
-                    if mDist < dist then target = v dist = mDist end
-                end
+-- // ⚙️ MOTOR DE BUSCA //
+local function GetClosest()
+    local target, dist = nil, _G.FOV
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
+            local pos, onScreen = game.Workspace.CurrentCamera:WorldToScreenPoint(v.Character.Head.Position)
+            if onScreen then
+                local mDist = (Vector2.new(pos.X, pos.Y) - game:GetService("UserInputService"):GetMouseLocation()).Magnitude
+                if mDist < dist then target = v dist = mDist end
             end
         end
-        if target then
-            game.Workspace.CurrentCamera.CFrame = CFrame.new(game.Workspace.CurrentCamera.CFrame.Position, target.Character.Head.Position)
+    end
+    return target
+end
+
+-- // ⚙️ ENGINE DE TIRO //
+local mt = getrawmetatable(game)
+local old = mt.__namecall
+setreadonly(mt, false)
+mt.__namecall = newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+    local args = {...}
+    if (_G.SilentAim or _G.Wallshot) and (method == "FindPartOnRayWithIgnoreList" or method == "Raycast") then
+        local t = GetClosest()
+        if t then
+            args[1] = Ray.new(game.Workspace.CurrentCamera.CFrame.Position, (t.Character.Head.Position - game.Workspace.CurrentCamera.CFrame.Position).Unit * 1000)
+            return old(self, unpack(args))
         end
     end
-    
-    if _G.Spd and game.Players.LocalPlayer.Character then
-        local char = game.Players.LocalPlayer.Character
-        local hum = char:FindFirstChild("Humanoid")
-        if hum and hum.MoveDirection.Magnitude > 0 then
-            char:TranslateBy(hum.MoveDirection * 0.4)
-        end
+    return old(self, ...)
+end)
+setreadonly(mt, true)
+
+-- // ⚙️ LOOP RENDER //
+game:GetService("RunService").RenderStepped:Connect(function()
+    FOVCircle.Radius = _G.FOV
+    FOVCircle.Visible = _G.ShowFOV
+    FOVCircle.Position = game:GetService("UserInputService"):GetMouseLocation()
+
+    if _G.SpeedEnabled and game.Players.LocalPlayer.Character then
+        local hum = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+        if hum then hum.WalkSpeed = _G.SpeedValue end
     end
 end)
+
+Rayfield:Notify({Title = "KRONOS V54", Content = "Carregado com Sucesso!", Duration = 5})
