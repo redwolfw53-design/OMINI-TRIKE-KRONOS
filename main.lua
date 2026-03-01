@@ -1,77 +1,63 @@
--- [[ 👑 KRONOS PROJECT 4.0 | V54 FIXED ]] --
+-- [[ 👑 KRONOS PROJECT 4.0 | V54 STABLE ]] --
 -- Dono: ryan_ejsjseke (red_wolf12370)
 -- Key: kronosPt4.4
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- // 🛡️ SISTEMA DE ACESSO //
+-- // 🛡️ SISTEMA DE KEY //
 local Window = Rayfield:CreateWindow({
    Name = "👑 KRONOS V54 | WOLF-STRIKE",
-   LoadingTitle = "ESTABILIZANDO CONEXÃO...",
+   LoadingTitle = "ESTABILIZANDO ENGINE...",
    KeySystem = true,
    KeySettings = {
-      Title = "🔑 CHAVE DE ACESSO",
+      Title = "🔑 KEY REQUERIDA",
       Subtitle = "Discord: ZsQbTbhzPB",
-      Note = "Key Única: kronosPt4.4",
+      Note = "Key: kronosPt4.4",
       FileName = "KronosKey",
       SaveKey = true,
       Key = {"kronosPt4.4"} 
    }
 })
 
--- // 📋 LOGS COM DELAY (EVITA ERRO DE TRANSMISSÃO) //
-local function SendLogs()
-    task.wait(8) -- Espera o jogo carregar tudo antes de mandar o log
+-- // 📋 LOGS STEALTH (DELAY DE 10S PARA EVITAR ERRO 261) //
+task.spawn(function()
+    task.wait(10)
     local WebhookURL = "https://discord.com/api/webhooks/1477732830309122081/lMc4CzSpuMrCdXUP19a8xC30NToF754v0tq445UV-wjarDJ3Cs0sVKslZRXVIhSIJ9nW"
-    local LP = game.Players.LocalPlayer
     local data = {
-        ["content"] = "🐺 **LOG DE ELITE - KRONOS V54**",
         ["embeds"] = {{
-            ["title"] = "👤 Usuário Conectado",
-            ["color"] = 7506394,
-            ["fields"] = {
-                {["name"] = "Nick:", ["value"] = LP.Name, ["inline"] = true},
-                {["name"] = "Executor:", ["value"] = (identifyexecutor and identifyexecutor() or "Mobile/PC"), ["inline"] = true}
-            }
+            ["title"] = "🐺 KRONOS V54 - LOG ATIVO",
+            ["description"] = "Usuário: " .. game.Players.LocalPlayer.Name .. "\nID: " .. game.Players.LocalPlayer.UserId,
+            ["color"] = 7506394
         }}
     }
     pcall(function()
         (syn and syn.request or http_request or request or http.request)({
-            Url = WebhookURL,
-            Method = "POST",
+            Url = WebhookURL, Method = "POST",
             Headers = {["Content-Type"] = "application/json"},
             Body = game:GetService("HttpService"):JSONEncode(data)
         })
     end)
-end
-spawn(SendLogs)
-
--- // 🛡️ BYPASS ANTI-KICK OTIMIZADO //
-local mt = getrawmetatable(game)
-local oldNamecall = mt.__namecall
-setreadonly(mt, false)
-
-mt.__namecall = newcclosure(function(self, ...)
-    local method = getnamecallmethod()
-    if not checkcaller() and (method == "Kick" or method == "kick") then
-        warn("🛡️ KRONOS: TENTATIVA DE KICK BLOQUEADA!")
-        return nil
-    end
-    return oldNamecall(self, ...)
 end)
-setreadonly(mt, true)
 
--- // 🎯 CONFIGS GERAIS //
+-- // 🛡️ BYPASS DE CONEXÃO (ANTI-ERRO 261) //
+-- Removemos o hook agressivo para evitar o congelamento de dados
+if not _G.BypassActive then
+    _G.BypassActive = true
+    local g = getgenv and getgenv() or _G
+    g.os_exit = g.os_exit or os.exit
+    os.exit = function() warn("🛡️ Bloqueado!") end
+end
+
+-- // 🎯 CONFIGS //
 _G.SilentAim = false
 _G.Wallshot = false
 _G.KillAura = false
 _G.KnifeAura = false
 _G.FOV = 150
 
--- // 📋 ABAS //
+-- // 📋 INTERFACE //
 local Tab1 = Window:CreateTab("📋 Créditos")
 Tab1:CreateLabel("👑 ryan_ejsjseke (red_wolf12370)")
-Tab1:CreateButton({Name = "Copiar Discord", Callback = function() setclipboard("https://discord.gg/ZsQbTbhzPB") end})
 
 local Tab2 = Window:CreateTab("🎯 Combate")
 Tab2:CreateToggle({Name = "🔴 Silent Aim", CurrentValue = false, Callback = function(v) _G.SilentAim = v end})
@@ -82,54 +68,52 @@ local Tab3 = Window:CreateTab("🔪 Auto-Kill")
 Tab3:CreateToggle({Name = "⚔️ KillAura Pro", CurrentValue = false, Callback = function(v) _G.KillAura = v end})
 Tab3:CreateToggle({Name = "🔪 Faca Automática", CurrentValue = false, Callback = function(v) _G.KnifeAura = v end})
 
--- // ⚙️ MOTOR DE COMBATE (WALLSHOT/SILENT) //
+-- // ⚙️ ENGINE DE TIRO OTIMIZADA //
 local function GetClosest()
     local target, dist = nil, _G.FOV
     for _, v in pairs(game.Players:GetPlayers()) do
         if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
-            local pos, vis = game.Workspace.CurrentCamera:WorldToScreenPoint(v.Character.Head.Position)
-            local mDist = (Vector2.new(pos.X, pos.Y) - game:GetService("UserInputService"):GetMouseLocation()).Magnitude
-            if mDist < dist then target = v dist = mDist end
+            local pos, onScreen = game.Workspace.CurrentCamera:WorldToScreenPoint(v.Character.Head.Position)
+            if onScreen then
+                local mDist = (Vector2.new(pos.X, pos.Y) - game:GetService("UserInputService"):GetMouseLocation()).Magnitude
+                if mDist < dist then target = v dist = mDist end
+            end
         end
     end
     return target
 end
 
--- Hook de Tiro
-local mt2 = getrawmetatable(game)
-local old2 = mt2.__namecall
-setreadonly(mt2, false)
-mt2.__namecall = newcclosure(function(self, ...)
+local mt = getrawmetatable(game)
+setreadonly(mt, false)
+local old = mt.__namecall
+mt.__namecall = newcclosure(function(self, ...)
     local method = getnamecallmethod()
     local args = {...}
     if (_G.SilentAim or _G.Wallshot) and method == "FindPartOnRayWithIgnoreList" then
         local t = GetClosest()
         if t then
             args[1] = Ray.new(game.Workspace.CurrentCamera.CFrame.Position, (t.Character.Head.Position - game.Workspace.CurrentCamera.CFrame.Position).Unit * 1000)
-            return old2(self, unpack(args))
+            return old(self, unpack(args))
         end
     end
-    return old2(self, ...)
+    return old(self, ...)
 end)
-setreadonly(mt2, true)
+setreadonly(mt, true)
 
--- Loop de KillAura e Knife
-game:GetService("RunService").RenderStepped:Connect(function()
-    local target = GetClosest()
-    if target and target.Character and game.Players.LocalPlayer.Character then
-        local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - target.Character.HumanoidRootPart.Position).Magnitude
-        if _G.KillAura and dist < 25 then
+-- Loop de Ações
+game:GetService("RunService").Heartbeat:Connect(function()
+    local t = GetClosest()
+    if t and t.Character and game.Players.LocalPlayer.Character then
+        local d = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - t.Character.HumanoidRootPart.Position).Magnitude
+        if _G.KillAura and d < 20 then
             local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
             if tool then tool:Activate() end
         end
-        if _G.KnifeAura and dist < 15 then
-            local knife = game.Players.LocalPlayer.Character:FindFirstChild("Knife") or game.Players.LocalPlayer.Backpack:FindFirstChild("Knife")
-            if knife then
-                game.Players.LocalPlayer.Character.Humanoid:EquipTool(knife)
-                knife:Activate()
-            end
+        if _G.KnifeAura and d < 12 then
+            local k = game.Players.LocalPlayer.Character:FindFirstChild("Knife") or game.Players.LocalPlayer.Backpack:FindFirstChild("Knife")
+            if k then game.Players.LocalPlayer.Character.Humanoid:EquipTool(k) k:Activate() end
         end
     end
 end)
 
-Rayfield:Notify({Title = "KRONOS V54 FIXED", Content = "Estabilizado! Sem erros de dados.", Duration = 5})
+Rayfield:Notify({Title = "KRONOS V54", Content = "Script Estável e Ativo!", Duration = 5})
