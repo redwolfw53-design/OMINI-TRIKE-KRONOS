@@ -1,115 +1,104 @@
 --[[ 
-    👑 KRONOS OMNI-STRIKE V21 | OFFICIAL REPOSITORY
+    👑 KRONOS OMNI-STRIKE | V22 PROFESSIONAL
     Dono: red_wolf12370
-    Discord: https://discord.gg/DPQyZyJQK
-    Status: Undetected / Universal PVP
+    Status: GitHub Hosted / Anti-Ban Fortificado
 --]]
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "👑 KRONOS V21 | red_wolf12370",
-   LoadingTitle = "BYPASSING SYSTEMS...",
+   Name = "👑 KRONOS V22 | red_wolf12370",
+   LoadingTitle = "SINCRONIZANDO COM GITHUB...",
    Theme = "DarkPurple",
    ConfigurationSaving = { Enabled = false }
 })
 
 -- // SETTINGS GLOBAIS //
-getgenv().KronosSettings = {
-    HitboxSize = 2,
-    HitboxEnabled = false,
-    AimlockEnabled = false,
+getgenv().Kronos = {
+    HB_Size = 2,
+    HB_Enabled = false,
+    AL_Enabled = false,
     Target = "",
     Speed = 16,
-    Noclip = false,
-    ESP = false
+    Noclip = false
 }
 
-local Player = game.Players.LocalPlayer
-local Camera = workspace.CurrentCamera
-local RunService = game:GetService("RunService")
+-- // 🎯 ABA: COMBATE //
+local T1 = Window:CreateTab("🎯 Combate")
 
--- // 🎯 COMBATE //
-local Tab1 = Window:CreateTab("🎯 Combate")
-
-Tab1:CreateToggle({
+T1:CreateToggle({
    Name = "🔴 Ativar Hitbox Expander",
    CurrentValue = false,
-   Callback = function(v) getgenv().KronosSettings.HitboxEnabled = v end
+   Callback = function(v) getgenv().Kronos.HB_Enabled = v end
 })
 
-Tab1:CreateSlider({
+T1:CreateSlider({
    Name = "Tamanho da Hitbox",
-   Min = 2, Max = 40, CurrentValue = 2,
-   Callback = function(v) getgenv().KronosSettings.HitboxSize = v end
+   Min = 2, Max = 35, CurrentValue = 2, -- Limite seguro para não travar
+   Callback = function(v) getgenv().Kronos.HB_Size = v end
 })
 
-Tab1:CreateInput({
-   Name = "Alvo (Nick)",
-   PlaceholderText = "Nick do player...",
-   Callback = function(t) getgenv().KronosSettings.Target = t end
+T1:CreateInput({
+   Name = "Nick do Alvo",
+   PlaceholderText = "Escreva o nome...",
+   Callback = function(t) getgenv().Kronos.Target = t end
 })
 
-Tab1:CreateToggle({
+T1:CreateToggle({
    Name = "🔒 Travar Mira (Aimlock)",
    CurrentValue = false,
-   Callback = function(v) getgenv().KronosSettings.AimlockEnabled = v end
+   Callback = function(v) getgenv().Kronos.AL_Enabled = v end
 })
 
--- // ⚡ MOVIMENTO //
-local Tab2 = Window:CreateTab("⚡ Movimento")
+-- // ⚡ ABA: MOVIMENTO //
+local T2 = Window:CreateTab("⚡ Movimento")
 
-Tab2:CreateSlider({
-   Name = "Speed (Velocidade)",
+T2:CreateSlider({
+   Name = "Velocidade (Speed)",
    Min = 16, Max = 250, CurrentValue = 16,
-   Callback = function(v) getgenv().KronosSettings.Speed = v end
+   Callback = function(v) getgenv().Kronos.Speed = v end
 })
 
-Tab2:CreateToggle({
+T2:CreateToggle({
    Name = "👻 Noclip Profissional",
    CurrentValue = false,
-   Callback = function(v) getgenv().KronosSettings.Noclip = v end
+   Callback = function(v) getgenv().Kronos.Noclip = v end
 })
 
--- // 📋 CRÉDITOS //
-local Tab3 = Window:CreateTab("📋 Créditos")
-
-Tab3:CreateLabel("👑 Criador: red_wolf12370")
-Tab3:CreateButton({
-   Name = "🔗 Copiar Discord do Dono",
-   Callback = function()
-      setclipboard("https://discord.gg/DPQyZyJQK")
-      Rayfield:Notify({Title = "KRONOS", Content = "Discord copiado!", Duration = 3})
-   end
+-- // 📋 ABA: CRÉDITOS //
+local T3 = Window:CreateTab("📋 Créditos")
+T3:CreateLabel("👑 Criador: red_wolf12370")
+T3:CreateButton({
+   Name = "🔗 Copiar Discord",
+   Callback = function() setclipboard("https://discord.gg/DPQyZyJQK") end
 })
 
 -- // MOTOR DO SCRIPT //
-RunService.RenderStepped:Connect(function()
-    local Char = Player.Character
-    if Char and Char:FindFirstChild("Humanoid") then
-        Char.Humanoid.WalkSpeed = getgenv().KronosSettings.Speed
-        if getgenv().KronosSettings.Noclip then
-            for _, p in pairs(Char:GetDescendants()) do
-                if p:IsA("BasePart") then p.CanCollide = false end
+game:GetService("RunService").RenderStepped:Connect(function()
+    local p = game.Players.LocalPlayer
+    local char = p.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.WalkSpeed = getgenv().Kronos.Speed
+        if getgenv().Kronos.Noclip then
+            for _, v in pairs(char:GetDescendants()) do
+                if v:IsA("BasePart") then v.CanCollide = false end
             end
         end
     end
 
-    if getgenv().KronosSettings.HitboxEnabled then
+    if getgenv().Kronos.HB_Enabled then
         for _, v in pairs(game.Players:GetPlayers()) do
-            if v ~= Player and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                v.Character.HumanoidRootPart.Size = Vector3.new(getgenv().KronosSettings.HitboxSize, getgenv().KronosSettings.HitboxSize, getgenv().KronosSettings.HitboxSize)
+            if v ~= p and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                v.Character.HumanoidRootPart.Size = Vector3.new(getgenv().Kronos.HB_Size, getgenv().Kronos.HB_Size, getgenv().Kronos.HB_Size)
                 v.Character.HumanoidRootPart.Transparency = 0.7
             end
         end
     end
 
-    if getgenv().KronosSettings.AimlockEnabled and getgenv().KronosSettings.Target ~= "" then
-        local t = game.Players:FindFirstChild(getgenv().KronosSettings.Target)
+    if getgenv().Kronos.AL_Enabled and getgenv().Kronos.Target ~= "" then
+        local t = game.Players:FindFirstChild(getgenv().Kronos.Target)
         if t and t.Character and t.Character:FindFirstChild("Head") then
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, t.Character.Head.Position)
+            workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, t.Character.Head.Position)
         end
     end
 end)
-
-Rayfield:Notify({Title = "KRONOS V21", Content = "Script carregado via GitHub!", Duration = 5})
