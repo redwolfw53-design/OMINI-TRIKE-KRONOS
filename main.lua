@@ -1,76 +1,60 @@
--- [[ 👑 KRONOS PROJECT 4.0 | V54 FINAL FIX ]] --
+-- [[ 👑 KRONOS PROJECT 4.0 | V54 ULTIMATE ]] --
 -- Dono: ryan_ejsjseke (red_wolf12370)
--- Especial para: TIRO DE PISTOLA (Anti-Kick)
 -- Key: kronosPt4.4
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "👑 KRONOS V54 | BYPASS",
-   LoadingTitle = "LIMPANDO RASTROS DO ANTI-CHEAT...",
+   Name = "👑 KRONOS V54 | ULTIMATE WOLF",
+   LoadingTitle = "INSTALANDO MÓDULOS DE ELITE...",
    KeySystem = true,
    KeySettings = {
-      Title = "🔑 KEY REQUERIDA",
-      Subtitle = "Discord: ZsQbTbhzPB",
-      Note = "Chave: kronosPt4.4",
+      Title = "🔑 SISTEMA DE KEY",
+      Subtitle = "Pegue no Discord: ZsQbTbhzPB",
+      Note = "Key: kronosPt4.4",
       FileName = "KronosKey",
       SaveKey = true,
       Key = {"kronosPt4.4"} 
    }
 })
 
--- // 🛡️ BYPASS SILENCIOSO (NÃO TRAVA A CONEXÃO) //
-task.spawn(function()
-    local g = getgenv()
-    g.ScriptLoaded = true
-    -- Substitui o kick por um aviso simples para não congelar os dados
-    local old; old = hookmetamethod(game, "__namecall", function(self, ...)
-        local method = getnamecallmethod()
-        if not checkcaller() and (method == "Kick" or method == "kick") then
-            return nil
-        end
-        return old(self, ...)
-    end)
-end)
-
--- // 📋 LOGS (COM MUITO DELAY PARA NÃO DAR LAG) //
-task.spawn(function()
-    task.wait(15) -- Espera 15 segundos para o jogo estabilizar
-    local WebhookURL = "https://discord.com/api/webhooks/1477732830309122081/lMc4CzSpuMrCdXUP19a8xC30NToF754v0tq445UV-wjarDJ3Cs0sVKslZRXVIhSIJ9nW"
-    pcall(function()
-        (syn and syn.request or http_request or request or http.request)({
-            Url = WebhookURL, Method = "POST",
-            Headers = {["Content-Type"] = "application/json"},
-            Body = game:GetService("HttpService"):JSONEncode({["content"] = "🌑 **KRONOS V54 ESTÁVEL**\nUser: "..game.Players.LocalPlayer.Name})
-        })
-    end)
-end)
-
--- // 🎯 CONFIGS //
+-- // 🎯 VARIÁVEIS DE CONTROLE //
 _G.SilentAim = false
+_G.Wallshot = false
+_G.NoRecoil = false
+_G.InfAmmo = false
 _G.SpeedEnabled = false
 _G.SpeedValue = 16
 _G.FOV = 150
-_G.ShowFOV = true
+_G.EspEnabled = false
 
--- // 📐 DESENHO DO CÍRCULO (PRETO) //
+-- // 📐 FOV DRAWING (PRETO) //
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Thickness = 2
 FOVCircle.Color = Color3.fromRGB(0, 0, 0)
 FOVCircle.Filled = false
 FOVCircle.Transparency = 1
 
--- // 📋 ABAS //
+-- // 📋 ABA COMBATE //
 local Tab1 = Window:CreateTab("🎯 Combate")
-Tab1:CreateToggle({Name = "🔴 Silent Aim (Safe)", CurrentValue = false, Callback = function(v) _G.SilentAim = v end})
-Tab1:CreateToggle({Name = "⭕ Mostrar FOV Preto", CurrentValue = true, Callback = function(v) _G.ShowFOV = v end})
-Tab1:CreateSlider({Name = "📐 Tamanho FOV", Min = 50, Max = 600, Default = 150, Callback = function(v) _G.FOV = v end})
+Tab1:CreateSection("Ajustes de Tiro")
+Tab1:CreateToggle({Name = "🔴 Silent Aim", CurrentValue = false, Callback = function(v) _G.SilentAim = v end})
+Tab1:CreateToggle({Name = "🧱 Wallshot", CurrentValue = false, Callback = function(v) _G.Wallshot = v end})
+Tab1:CreateToggle({Name = "🚫 No Recoil (Sem Coice)", CurrentValue = false, Callback = function(v) _G.NoRecoil = v end})
+Tab1:CreateToggle({Name = "♾️ Infinite Ammo", CurrentValue = false, Callback = function(v) _G.InfAmmo = v end})
+Tab1:CreateSlider({Name = "📐 FOV Radius", Min = 50, Max = 800, Default = 150, Callback = function(v) _G.FOV = v end})
 
-local Tab2 = Window:CreateTab("🏃 Movimento")
-Tab2:CreateToggle({Name = "⚡ Speed Hack", CurrentValue = false, Callback = function(v) _G.SpeedEnabled = v end})
-Tab2:CreateSlider({Name = "💨 Velocidade", Min = 16, Max = 150, Default = 50, Callback = function(v) _G.SpeedValue = v end})
+-- // 👁️ ABA VISUAL (ESP) //
+local Tab2 = Window:CreateTab("👁️ Visual")
+Tab2:CreateToggle({Name = "👥 ESP Box (Ver Inimigos)", CurrentValue = false, Callback = function(v) _G.EspEnabled = v end})
+Tab2:CreateToggle({Name = "⭕ Mostrar FOV Preto", CurrentValue = true, Callback = function(v) FOVCircle.Visible = v end})
 
--- // ⚙️ MOTOR DE BUSCA (MAIS LEVE) //
+-- // 🏃 ABA MOVIMENTO //
+local Tab3 = Window:CreateTab("🏃 Movimento")
+Tab3:CreateToggle({Name = "⚡ Speed Hack", CurrentValue = false, Callback = function(v) _G.SpeedEnabled = v end})
+Tab3:CreateSlider({Name = "💨 Velocidade", Min = 16, Max = 250, Default = 50, Callback = function(v) _G.SpeedValue = v end})
+
+-- // ⚙️ MOTOR DE BUSCA (CLOSEST PLAYER) //
 local function GetClosest()
     local target, dist = nil, _G.FOV
     for _, v in pairs(game.Players:GetPlayers()) do
@@ -85,32 +69,65 @@ local function GetClosest()
     return target
 end
 
--- // ⚙️ SILENT AIM SEM MEXER NA METATABLE (MAIS SEGURO) //
-task.spawn(function()
-    game:GetService("RunService").RenderStepped:Connect(function()
-        FOVCircle.Radius = _G.FOV
-        FOVCircle.Visible = _G.ShowFOV
-        FOVCircle.Position = game:GetService("UserInputService"):GetMouseLocation()
+-- // ⚙️ HOOKS DE COMBATE (SILENT/WALL/RECOIL/AMMO) //
+local mt = getrawmetatable(game)
+local old = mt.__namecall
+setreadonly(mt, false)
 
-        if _G.SilentAim then
-            local t = GetClosest()
-            if t and t.Character and t.Character:FindFirstChild("Head") then
-                -- O segredo: Não mudamos o raio, apenas avisamos o jogo onde o inimigo está
-                if game:GetService("UserInputService"):IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-                   -- Aqui você pode adicionar um pequeno "Aimbot" suave se o Silent Aim falhar
-                end
+mt.__namecall = newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+    local args = {...}
+
+    -- Silent Aim & Wallshot
+    if (_G.SilentAim or _G.Wallshot) and (method == "FindPartOnRayWithIgnoreList" or method == "Raycast") then
+        local t = GetClosest()
+        if t then
+            args[1] = Ray.new(game.Workspace.CurrentCamera.CFrame.Position, (t.Character.Head.Position - game.Workspace.CurrentCamera.CFrame.Position).Unit * 1000)
+            return old(self, unpack(args))
+        end
+    end
+    
+    return old(self, ...)
+end)
+setreadonly(mt, true)
+
+-- // ⚙️ LOOP PRINCIPAL (SPEED / NO RECOIL / ESP) //
+game:GetService("RunService").RenderStepped:Connect(function()
+    -- Atualiza FOV
+    FOVCircle.Radius = _G.FOV
+    FOVCircle.Position = game:GetService("UserInputService"):GetMouseLocation()
+
+    -- Speed Hack
+    if _G.SpeedEnabled and game.Players.LocalPlayer.Character then
+        local hum = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+        if hum then hum.WalkSpeed = _G.SpeedValue end
+    end
+
+    -- No Recoil & Infinite Ammo (Muda os stats da arma na mão)
+    if _G.NoRecoil or _G.InfAmmo then
+        for _, v in pairs(game.Players.LocalPlayer.Character:GetChildren()) do
+            if v:IsA("Tool") and v:FindFirstChild("Data") or v:FindFirstChild("Stats") then
+                -- Aqui o script tenta ajustar os valores da arma dinamicamente
+                pcall(function()
+                    if _G.NoRecoil then v.Data.Recoil.Value = 0 end
+                    if _G.InfAmmo then v.Data.Ammo.Value = 999 end
+                end)
             end
         end
-        
-        -- Speed Hack via CFrame (Não dá Erro 261)
-        if _G.SpeedEnabled and game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local char = game.Players.LocalPlayer.Character
-            local hum = char.Humanoid
-            if hum.MoveDirection.Magnitude > 0 then
-                char:TranslateBy(hum.MoveDirection * (_G.SpeedValue / 50))
-            end
-        end
+    end
+end)
+
+-- // 📋 LOGS (DELAYS PARA SEGURANÇA) //
+task.spawn(function()
+    task.wait(12)
+    local WebhookURL = "https://discord.com/api/webhooks/1477732830309122081/lMc4CzSpuMrCdXUP19a8xC30NToF754v0tq445UV-wjarDJ3Cs0sVKslZRXVIhSIJ9nW"
+    pcall(function()
+        (syn and syn.request or http_request or request or http.request)({
+            Url = WebhookURL, Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = game:GetService("HttpService"):JSONEncode({["content"] = "🔥 **KRONOS ULTIMATE ATIVADO!**\n👑 Dono: ryan_ejsjseke\n👤 User: "..game.Players.LocalPlayer.Name})
+        })
     end)
 end)
 
-Rayfield:Notify({Title = "KRONOS V54", Content = "Bypass de Conexão Ativo!", Duration = 5})
+Rayfield:Notify({Title = "KRONOS V54", Content = "Funções de Elite Carregadas!", Duration = 5})
