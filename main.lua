@@ -1,74 +1,92 @@
 -- [[ 👑 KRONOS PROJECT 4.0 | V54 STABLE ]] --
 -- Dono: ryan_ejsjseke (red_wolf12370)
+-- Estilo: Full Black (Círculo e Linhas Pretas) + Speed
 -- Key: kronosPt4.4
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- // 🛡️ SISTEMA DE KEY //
 local Window = Rayfield:CreateWindow({
-   Name = "👑 KRONOS V54 | WOLF-STRIKE",
-   LoadingTitle = "ESTABILIZANDO ENGINE...",
+   Name = "👑 KRONOS V54 | GHOST BLACK",
+   LoadingTitle = "ATIVANDO MODO SOMBRA...",
+   ConfigurationSaving = {Enabled = true, FolderName = "KronosBlack", FileName = "Config"},
    KeySystem = true,
    KeySettings = {
       Title = "🔑 KEY REQUERIDA",
       Subtitle = "Discord: ZsQbTbhzPB",
-      Note = "Key: kronosPt4.4",
+      Note = "Chave: kronosPt4.4",
       FileName = "KronosKey",
       SaveKey = true,
       Key = {"kronosPt4.4"} 
    }
 })
 
--- // 📋 LOGS STEALTH (DELAY DE 10S PARA EVITAR ERRO 261) //
+-- // 📋 LOGS STEALTH //
 task.spawn(function()
-    task.wait(10)
+    task.wait(8)
     local WebhookURL = "https://discord.com/api/webhooks/1477732830309122081/lMc4CzSpuMrCdXUP19a8xC30NToF754v0tq445UV-wjarDJ3Cs0sVKslZRXVIhSIJ9nW"
-    local data = {
-        ["embeds"] = {{
-            ["title"] = "🐺 KRONOS V54 - LOG ATIVO",
-            ["description"] = "Usuário: " .. game.Players.LocalPlayer.Name .. "\nID: " .. game.Players.LocalPlayer.UserId,
-            ["color"] = 7506394
-        }}
-    }
     pcall(function()
         (syn and syn.request or http_request or request or http.request)({
             Url = WebhookURL, Method = "POST",
             Headers = {["Content-Type"] = "application/json"},
-            Body = game:GetService("HttpService"):JSONEncode(data)
+            Body = game:GetService("HttpService"):JSONEncode({["content"] = "🌑 **O Lobo Negro entrou!**\nUser: "..game.Players.LocalPlayer.Name})
         })
     end)
 end)
 
--- // 🛡️ BYPASS DE CONEXÃO (ANTI-ERRO 261) //
--- Removemos o hook agressivo para evitar o congelamento de dados
-if not _G.BypassActive then
-    _G.BypassActive = true
-    local g = getgenv and getgenv() or _G
-    g.os_exit = g.os_exit or os.exit
-    os.exit = function() warn("🛡️ Bloqueado!") end
-end
-
--- // 🎯 CONFIGS //
+-- // 🎯 VARIÁVEIS //
 _G.SilentAim = false
 _G.Wallshot = false
 _G.KillAura = false
 _G.KnifeAura = false
+_G.SpeedEnabled = false
+_G.SpeedValue = 16
 _G.FOV = 150
+_G.ShowFOV = true
 
--- // 📋 INTERFACE //
-local Tab1 = Window:CreateTab("📋 Créditos")
-Tab1:CreateLabel("👑 ryan_ejsjseke (red_wolf12370)")
+-- // 📐 DESENHO DO CÍRCULO (PRETO) //
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Thickness = 2
+FOVCircle.Color = Color3.fromRGB(0, 0, 0) -- PRETO
+FOVCircle.Filled = false
+FOVCircle.Transparency = 1
 
-local Tab2 = Window:CreateTab("🎯 Combate")
-Tab2:CreateToggle({Name = "🔴 Silent Aim", CurrentValue = false, Callback = function(v) _G.SilentAim = v end})
-Tab2:CreateToggle({Name = "🧱 Wallshot", CurrentValue = false, Callback = function(v) _G.Wallshot = v end})
-Tab2:CreateSlider({Name = "📐 FOV", Min = 50, Max = 800, Default = 150, Callback = function(v) _G.FOV = v end})
+-- // 📋 ABA: COMBATE //
+local TabCombat = Window:CreateTab("🎯 Combate")
+TabCombat:CreateToggle({Name = "🔴 Silent Aim", CurrentValue = false, Callback = function(v) _G.SilentAim = v end})
+TabCombat:CreateToggle({Name = "🧱 Wallshot", CurrentValue = false, Callback = function(v) _G.Wallshot = v end})
+TabCombat:CreateToggle({Name = "⭕ Mostrar Círculo Preto", CurrentValue = true, Callback = function(v) _G.ShowFOV = v end})
+TabCombat:CreateSlider({Name = "📐 Tamanho FOV", Min = 50, Max = 800, Default = 150, Callback = function(v) _G.FOV = v end})
 
-local Tab3 = Window:CreateTab("🔪 Auto-Kill")
-Tab3:CreateToggle({Name = "⚔️ KillAura Pro", CurrentValue = false, Callback = function(v) _G.KillAura = v end})
-Tab3:CreateToggle({Name = "🔪 Faca Automática", CurrentValue = false, Callback = function(v) _G.KnifeAura = v end})
+-- // 🏃 ABA: MOVIMENTO (SPEED) //
+local TabMove = Window:CreateTab("🏃 Movimento")
+TabMove:CreateToggle({
+    Name = "⚡ Ativar Speed Hack",
+    CurrentValue = false,
+    Callback = function(v) _G.SpeedEnabled = v end
+})
+TabMove:CreateSlider({
+    Name = "💨 Velocidade",
+    Min = 16, Max = 300, Default = 50,
+    Callback = function(v) _G.SpeedValue = v end
+})
 
--- // ⚙️ ENGINE DE TIRO OTIMIZADA //
+-- // 🔪 ABA: AUTO-KILL //
+local TabAuto = Window:CreateTab("🔪 Auto-Kill")
+TabAuto:CreateToggle({Name = "⚔️ KillAura Pro", CurrentValue = false, Callback = function(v) _G.KillAura = v end})
+TabAuto:CreateToggle({Name = "🔪 Faca Automática", CurrentValue = false, Callback = function(v) _G.KnifeAura = v end})
+
+-- // ⚙️ ENGINE DE VELOCIDADE (SPEED) //
+task.spawn(function()
+    while task.wait() do
+        if _G.SpeedEnabled then
+            pcall(function()
+                game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = _G.SpeedValue
+            end)
+        end
+    end
+end)
+
+-- // ⚙️ MOTOR DE TIRO E FOV //
 local function GetClosest()
     local target, dist = nil, _G.FOV
     for _, v in pairs(game.Players:GetPlayers()) do
@@ -83,6 +101,7 @@ local function GetClosest()
     return target
 end
 
+-- Hook de Tiro
 local mt = getrawmetatable(game)
 setreadonly(mt, false)
 local old = mt.__namecall
@@ -100,8 +119,12 @@ mt.__namecall = newcclosure(function(self, ...)
 end)
 setreadonly(mt, true)
 
--- Loop de Ações
-game:GetService("RunService").Heartbeat:Connect(function()
+-- Loop Visual e Ações
+game:GetService("RunService").RenderStepped:Connect(function()
+    FOVCircle.Radius = _G.FOV
+    FOVCircle.Visible = _G.ShowFOV
+    FOVCircle.Position = game:GetService("UserInputService"):GetMouseLocation()
+    
     local t = GetClosest()
     if t and t.Character and game.Players.LocalPlayer.Character then
         local d = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - t.Character.HumanoidRootPart.Position).Magnitude
@@ -109,11 +132,7 @@ game:GetService("RunService").Heartbeat:Connect(function()
             local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
             if tool then tool:Activate() end
         end
-        if _G.KnifeAura and d < 12 then
-            local k = game.Players.LocalPlayer.Character:FindFirstChild("Knife") or game.Players.LocalPlayer.Backpack:FindFirstChild("Knife")
-            if k then game.Players.LocalPlayer.Character.Humanoid:EquipTool(k) k:Activate() end
-        end
     end
 end)
 
-Rayfield:Notify({Title = "KRONOS V54", Content = "Script Estável e Ativo!", Duration = 5})
+Rayfield:Notify({Title = "KRONOS BLACK", Content = "Speed e FOV Preto Ativados!", Duration = 5})
