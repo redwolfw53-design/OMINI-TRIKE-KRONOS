@@ -1,16 +1,20 @@
 --[[ 
-    👑 KRONOS OMNI-STRIKE | V22 PROFESSIONAL
-    Dono: red_wolf12370
-    Status: GitHub Hosted / Anti-Ban Fortificado
+    👑 KRONOS OMNI-STRIKE | V23 CLEAN CACHE
+    Dono: redwolf53-design
+    Ajuste: Forçar Reset de Configurações
 --]]
+
+-- RESET TOTAL DE MEMÓRIA
+if _G.KronosLoaded then _G.KronosLoaded = nil end
+getgenv().Kronos = nil
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "👑 KRONOS V22 | red_wolf12370",
-   LoadingTitle = "SINCRONIZANDO COM GITHUB...",
+   Name = "👑 KRONOS V23 | redwolf53-design",
+   LoadingTitle = "LIMPANDO CACHE E SINCRONIZANDO...",
    Theme = "DarkPurple",
-   ConfigurationSaving = { Enabled = false }
+   ConfigurationSaving = { Enabled = false } -- Desativado para não guardar erros
 })
 
 -- // SETTINGS GLOBAIS //
@@ -23,39 +27,39 @@ getgenv().Kronos = {
     Noclip = false
 }
 
--- // 🎯 ABA: COMBATE //
+-- // ABA: COMBATE //
 local T1 = Window:CreateTab("🎯 Combate")
 
 T1:CreateToggle({
-   Name = "🔴 Ativar Hitbox Expander",
+   Name = "🔴 Ativar Hitbox",
    CurrentValue = false,
    Callback = function(v) getgenv().Kronos.HB_Enabled = v end
 })
 
 T1:CreateSlider({
    Name = "Tamanho da Hitbox",
-   Min = 2, Max = 35, CurrentValue = 2, -- Limite seguro para não travar
+   Min = 2, Max = 35, CurrentValue = 2,
    Callback = function(v) getgenv().Kronos.HB_Size = v end
 })
 
 T1:CreateInput({
    Name = "Nick do Alvo",
-   PlaceholderText = "Escreva o nome...",
+   PlaceholderText = "Nome...",
    Callback = function(t) getgenv().Kronos.Target = t end
 })
 
 T1:CreateToggle({
-   Name = "🔒 Travar Mira (Aimlock)",
+   Name = "🔒 Aimlock (Trava)",
    CurrentValue = false,
    Callback = function(v) getgenv().Kronos.AL_Enabled = v end
 })
 
--- // ⚡ ABA: MOVIMENTO //
+-- // ABA: MOVIMENTO //
 local T2 = Window:CreateTab("⚡ Movimento")
 
 T2:CreateSlider({
-   Name = "Velocidade (Speed)",
-   Min = 16, Max = 250, CurrentValue = 16,
+   Name = "Speed",
+   Min = 16, Max = 200, CurrentValue = 16,
    Callback = function(v) getgenv().Kronos.Speed = v end
 })
 
@@ -65,22 +69,21 @@ T2:CreateToggle({
    Callback = function(v) getgenv().Kronos.Noclip = v end
 })
 
--- // 📋 ABA: CRÉDITOS //
+-- // ABA: CRÉDITOS //
 local T3 = Window:CreateTab("📋 Créditos")
-T3:CreateLabel("👑 Criador: red_wolf12370")
+T3:CreateLabel("👑 Dono: redwolf53-design")
 T3:CreateButton({
    Name = "🔗 Copiar Discord",
    Callback = function() setclipboard("https://discord.gg/DPQyZyJQK") end
 })
 
--- // MOTOR DO SCRIPT //
+-- // LOOP DE EXECUÇÃO //
 game:GetService("RunService").RenderStepped:Connect(function()
     local p = game.Players.LocalPlayer
-    local char = p.Character
-    if char and char:FindFirstChild("Humanoid") then
-        char.Humanoid.WalkSpeed = getgenv().Kronos.Speed
+    if p.Character and p.Character:FindFirstChild("Humanoid") then
+        p.Character.Humanoid.WalkSpeed = getgenv().Kronos.Speed
         if getgenv().Kronos.Noclip then
-            for _, v in pairs(char:GetDescendants()) do
+            for _, v in pairs(p.Character:GetDescendants()) do
                 if v:IsA("BasePart") then v.CanCollide = false end
             end
         end
