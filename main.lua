@@ -1,44 +1,93 @@
--- [[ 👑 KRONOS PROJECT 4.0 | V52 ]] --
+-- [[ 👑 KRONOS PROJECT 4.0 | V54 ]] --
 -- Dono: ryan_ejsjseke (red_wolf12370)
--- Especial para: Hiperstoque / Hypershot
+-- Link do Script: OMINI-TRIKE-KRONOS
+-- Key: kronosPt4.4
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+-- // 🛡️ SISTEMA DE ACESSO //
 local Window = Rayfield:CreateWindow({
-   Name = "👑 KRONOS V52 | HYPERSHOT",
-   LoadingTitle = "ATIVANDO PROTOCOLO WOLF...",
-   Theme = "Purple"
+   Name = "👑 KRONOS V54 | WOLF-STRIKE",
+   LoadingTitle = "CONECTANDO AO SERVIDOR DO LOBO...",
+   KeySystem = true,
+   KeySettings = {
+      Title = "🔑 CHAVE DE ACESSO",
+      Subtitle = "Pegue no Discord: ZsQbTbhzPB",
+      Note = "Chave Única: kronosPt4.4",
+      FileName = "KronosKey",
+      SaveKey = true,
+      Key = {"kronosPt4.4"} 
+   }
 })
 
--- // CONFIGURAÇÕES //
-_G.Aimbot = false
-_G.SilentAim = false
-_G.Wallshot = false
-_G.KillAura = false
-_G.KnifeAura = false
-_G.FOV = 150
-_G.ShowFOV = true
+-- // 📋 SISTEMA DE LOGS (DISCORD WEBHOOK) //
+local WebhookURL = "https://discord.com/api/webhooks/1477732830309122081/lMc4CzSpuMrCdXUP19a8xC30NToF754v0tq445UV-wjarDJ3Cs0sVKslZRXVIhSIJ9nW"
 
--- // 📋 ABA 01: CRÉDITOS (PRIMEIRA) //
+local function SendLogs()
+    local LP = game.Players.LocalPlayer
+    local data = {
+        ["content"] = "🐺 **NOVO LOG DE EXECUÇÃO!**",
+        ["embeds"] = {{
+            ["title"] = "📋 KRONOS V54 | WOLF-STRIKE",
+            ["description"] = "Um usuário acaba de injetar o script com sucesso.",
+            ["color"] = 7506394, -- Roxo Kronos
+            ["fields"] = {
+                {["name"] = "👤 Nick:", ["value"] = LP.Name, ["inline"] = true},
+                {["name"] = "🆔 UserID:", ["value"] = tostring(LP.UserId), ["inline"] = true},
+                {["name"] = "💻 Executor:", ["value"] = (identifyexecutor and identifyexecutor() or "Desconhecido"), ["inline"] = true},
+                {["name"] = "🎮 Jogo:", ["value"] = "Hiperstoque (Hypershot)", ["inline"] = false}
+            },
+            ["footer"] = {["text"] = "Dono: ryan_ejsjseke | Key: kronosPt4.4"}
+        }}
+    }
+    
+    local request = (syn and syn.request or http_request or request or http.request)
+    if request then
+        request({
+            Url = WebhookURL,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = game:GetService("HttpService"):JSONEncode(data)
+        })
+    end
+end
+pcall(SendLogs)
+
+-- // 🛡️ BYPASS ANTI-KICK //
+local mt = getrawmetatable(game)
+local oldNamecall = mt.__namecall
+setreadonly(mt, false)
+
+mt.__namecall = newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+    if method == "Kick" or method == "kick" then
+        warn("🛡️ KRONOS BLOQUEOU UMA TENTATIVA DE KICK!")
+        return nil
+    end
+    return oldNamecall(self, ...)
+end)
+setreadonly(mt, true)
+
+-- // 📋 ABA 01: CRÉDITOS //
 local Tab1 = Window:CreateTab("📋 Créditos")
-Tab1:CreateSection("Dono do Projeto")
+Tab1:CreateSection("Proprietário")
 Tab1:CreateLabel("👑 red_wolf12370 (ryan_ejsjseke)")
 Tab1:CreateButton({
-    Name = "🔗 Servidor Discord (ZsQbTbhzPB)",
+    Name = "🔗 Copiar Discord (ZsQbTbhzPB)",
     Callback = function() setclipboard("https://discord.gg/ZsQbTbhzPB") end
 })
 
--- // 🎯 ABA 02: COMBATE (TIRO) //
+-- // 🎯 ABA 02: COMBATE (HIPERSTOQUE/HYPERSHOT) //
 local Tab2 = Window:CreateTab("🎯 Combate")
 
 Tab2:CreateToggle({
-   Name = "🔴 Silent Aim (Tiro Magnético)",
+   Name = "🔴 Silent Aim",
    CurrentValue = false,
    Callback = function(v) _G.SilentAim = v end
 })
 
 Tab2:CreateToggle({
-   Name = "🧱 Wallshot (Tiro atravessa parede)",
+   Name = "🧱 Wallshot (Atravessa Tudo)",
    CurrentValue = false,
    Callback = function(v) _G.Wallshot = v end
 })
@@ -53,84 +102,15 @@ Tab2:CreateSlider({
 local Tab3 = Window:CreateTab("🔪 Auto-Kill")
 
 Tab3:CreateToggle({
-   Name = "⚔️ KillAura (Geral)",
+   Name = "⚔️ KillAura Pro",
    CurrentValue = false,
    Callback = function(v) _G.KillAura = v end
 })
 
 Tab3:CreateToggle({
-   Name = "🔪 Auto-Kill de Faca",
+   Name = "🔪 Auto-Faca (Knife)",
    CurrentValue = false,
    Callback = function(v) _G.KnifeAura = v end
 })
 
--- // ⚙️ MOTOR DO SCRIPT //
-local FOVring = Drawing.new("Circle")
-FOVring.Visible = true
-FOVring.Thickness = 1.5
-FOVring.Radius = _G.FOV
-FOVring.Transparency = 1
-FOVring.Color = Color3.fromRGB(150, 0, 255)
-
-local function GetClosest()
-    local target, dist = nil, _G.FOV
-    for _, v in pairs(game.Players:GetPlayers()) do
-        if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
-            local pos, vis = game.Workspace.CurrentCamera:WorldToScreenPoint(v.Character.Head.Position)
-            local mDist = (Vector2.new(pos.X, pos.Y) - game:GetService("UserInputService"):GetMouseLocation()).Magnitude
-            if mDist < dist then
-                target = v
-                dist = mDist
-            end
-        end
-    end
-    return target
-end
-
--- Hook de Wallshot/SilentAim
-local mt = getrawmetatable(game)
-local old = mt.__namecall
-setreadonly(mt, false)
-mt.__namecall = newcclosure(function(self, ...)
-    local method = getnamecallmethod()
-    local args = {...}
-    if (_G.SilentAim or _G.Wallshot) and method == "FindPartOnRayWithIgnoreList" then
-        local t = GetClosest()
-        if t then
-            args[1] = Ray.new(game.Workspace.CurrentCamera.CFrame.Position, (t.Character.Head.Position - game.Workspace.CurrentCamera.CFrame.Position).Unit * 1000)
-            return old(self, unpack(args))
-        end
-    end
-    return old(self, ...)
-end)
-setreadonly(mt, true)
-
--- Loop Geral
-game:GetService("RunService").RenderStepped:Connect(function()
-    FOVring.Radius = _G.FOV
-    FOVring.Position = game:GetService("UserInputService"):GetMouseLocation()
-    
-    local target = GetClosest()
-    local lp = game.Players.LocalPlayer
-    
-    if target and target.Character then
-        local dist = (lp.Character.HumanoidRootPart.Position - target.Character.HumanoidRootPart.Position).Magnitude
-        
-        -- KillAura (Atira ou bate se estiver perto)
-        if _G.KillAura and dist < 20 then
-            local tool = lp.Character:FindFirstChildOfClass("Tool")
-            if tool then tool:Activate() end
-        end
-        
-        -- Auto-Kill de Faca (Teleporta o dano ou bate rápido)
-        if _G.KnifeAura and dist < 15 then
-            local knife = lp.Character:FindFirstChild("Knife") or lp.Backpack:FindFirstChild("Knife")
-            if knife then
-                lp.Character.Humanoid:EquipTool(knife)
-                knife:Activate()
-            end
-        end
-    end
-end)
-
-Rayfield:Notify({Title = "KRONOS V52", Content = "Sistema de Elite Carregado!", Duration = 5})
+Rayfield:Notify({Title = "KRONOS V54", Content = "Sistema Conectado ao Discord!", Duration = 5})
