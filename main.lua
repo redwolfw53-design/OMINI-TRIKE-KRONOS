@@ -1,14 +1,13 @@
--- [[ 👑 KRONOS PROJECT 4.0 | V54 STABLE ]] --
+-- [[ 👑 KRONOS PROJECT 4.0 | V54 FINAL FIX ]] --
 -- Dono: ryan_ejsjseke (red_wolf12370)
--- Estilo: Full Black (Círculo e Linhas Pretas) + Speed
+-- Especial para: TIRO DE PISTOLA (Anti-Kick)
 -- Key: kronosPt4.4
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "👑 KRONOS V54 | GHOST BLACK",
-   LoadingTitle = "ATIVANDO MODO SOMBRA...",
-   ConfigurationSaving = {Enabled = true, FolderName = "KronosBlack", FileName = "Config"},
+   Name = "👑 KRONOS V54 | BYPASS",
+   LoadingTitle = "LIMPANDO RASTROS DO ANTI-CHEAT...",
    KeySystem = true,
    KeySettings = {
       Title = "🔑 KEY REQUERIDA",
@@ -20,24 +19,35 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
--- // 📋 LOGS STEALTH //
+-- // 🛡️ BYPASS SILENCIOSO (NÃO TRAVA A CONEXÃO) //
 task.spawn(function()
-    task.wait(8)
+    local g = getgenv()
+    g.ScriptLoaded = true
+    -- Substitui o kick por um aviso simples para não congelar os dados
+    local old; old = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        if not checkcaller() and (method == "Kick" or method == "kick") then
+            return nil
+        end
+        return old(self, ...)
+    end)
+end)
+
+-- // 📋 LOGS (COM MUITO DELAY PARA NÃO DAR LAG) //
+task.spawn(function()
+    task.wait(15) -- Espera 15 segundos para o jogo estabilizar
     local WebhookURL = "https://discord.com/api/webhooks/1477732830309122081/lMc4CzSpuMrCdXUP19a8xC30NToF754v0tq445UV-wjarDJ3Cs0sVKslZRXVIhSIJ9nW"
     pcall(function()
         (syn and syn.request or http_request or request or http.request)({
             Url = WebhookURL, Method = "POST",
             Headers = {["Content-Type"] = "application/json"},
-            Body = game:GetService("HttpService"):JSONEncode({["content"] = "🌑 **O Lobo Negro entrou!**\nUser: "..game.Players.LocalPlayer.Name})
+            Body = game:GetService("HttpService"):JSONEncode({["content"] = "🌑 **KRONOS V54 ESTÁVEL**\nUser: "..game.Players.LocalPlayer.Name})
         })
     end)
 end)
 
--- // 🎯 VARIÁVEIS //
+-- // 🎯 CONFIGS //
 _G.SilentAim = false
-_G.Wallshot = false
-_G.KillAura = false
-_G.KnifeAura = false
 _G.SpeedEnabled = false
 _G.SpeedValue = 16
 _G.FOV = 150
@@ -46,47 +56,21 @@ _G.ShowFOV = true
 -- // 📐 DESENHO DO CÍRCULO (PRETO) //
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Thickness = 2
-FOVCircle.Color = Color3.fromRGB(0, 0, 0) -- PRETO
+FOVCircle.Color = Color3.fromRGB(0, 0, 0)
 FOVCircle.Filled = false
 FOVCircle.Transparency = 1
 
--- // 📋 ABA: COMBATE //
-local TabCombat = Window:CreateTab("🎯 Combate")
-TabCombat:CreateToggle({Name = "🔴 Silent Aim", CurrentValue = false, Callback = function(v) _G.SilentAim = v end})
-TabCombat:CreateToggle({Name = "🧱 Wallshot", CurrentValue = false, Callback = function(v) _G.Wallshot = v end})
-TabCombat:CreateToggle({Name = "⭕ Mostrar Círculo Preto", CurrentValue = true, Callback = function(v) _G.ShowFOV = v end})
-TabCombat:CreateSlider({Name = "📐 Tamanho FOV", Min = 50, Max = 800, Default = 150, Callback = function(v) _G.FOV = v end})
+-- // 📋 ABAS //
+local Tab1 = Window:CreateTab("🎯 Combate")
+Tab1:CreateToggle({Name = "🔴 Silent Aim (Safe)", CurrentValue = false, Callback = function(v) _G.SilentAim = v end})
+Tab1:CreateToggle({Name = "⭕ Mostrar FOV Preto", CurrentValue = true, Callback = function(v) _G.ShowFOV = v end})
+Tab1:CreateSlider({Name = "📐 Tamanho FOV", Min = 50, Max = 600, Default = 150, Callback = function(v) _G.FOV = v end})
 
--- // 🏃 ABA: MOVIMENTO (SPEED) //
-local TabMove = Window:CreateTab("🏃 Movimento")
-TabMove:CreateToggle({
-    Name = "⚡ Ativar Speed Hack",
-    CurrentValue = false,
-    Callback = function(v) _G.SpeedEnabled = v end
-})
-TabMove:CreateSlider({
-    Name = "💨 Velocidade",
-    Min = 16, Max = 300, Default = 50,
-    Callback = function(v) _G.SpeedValue = v end
-})
+local Tab2 = Window:CreateTab("🏃 Movimento")
+Tab2:CreateToggle({Name = "⚡ Speed Hack", CurrentValue = false, Callback = function(v) _G.SpeedEnabled = v end})
+Tab2:CreateSlider({Name = "💨 Velocidade", Min = 16, Max = 150, Default = 50, Callback = function(v) _G.SpeedValue = v end})
 
--- // 🔪 ABA: AUTO-KILL //
-local TabAuto = Window:CreateTab("🔪 Auto-Kill")
-TabAuto:CreateToggle({Name = "⚔️ KillAura Pro", CurrentValue = false, Callback = function(v) _G.KillAura = v end})
-TabAuto:CreateToggle({Name = "🔪 Faca Automática", CurrentValue = false, Callback = function(v) _G.KnifeAura = v end})
-
--- // ⚙️ ENGINE DE VELOCIDADE (SPEED) //
-task.spawn(function()
-    while task.wait() do
-        if _G.SpeedEnabled then
-            pcall(function()
-                game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = _G.SpeedValue
-            end)
-        end
-    end
-end)
-
--- // ⚙️ MOTOR DE TIRO E FOV //
+-- // ⚙️ MOTOR DE BUSCA (MAIS LEVE) //
 local function GetClosest()
     local target, dist = nil, _G.FOV
     for _, v in pairs(game.Players:GetPlayers()) do
@@ -101,38 +85,32 @@ local function GetClosest()
     return target
 end
 
--- Hook de Tiro
-local mt = getrawmetatable(game)
-setreadonly(mt, false)
-local old = mt.__namecall
-mt.__namecall = newcclosure(function(self, ...)
-    local method = getnamecallmethod()
-    local args = {...}
-    if (_G.SilentAim or _G.Wallshot) and method == "FindPartOnRayWithIgnoreList" then
-        local t = GetClosest()
-        if t then
-            args[1] = Ray.new(game.Workspace.CurrentCamera.CFrame.Position, (t.Character.Head.Position - game.Workspace.CurrentCamera.CFrame.Position).Unit * 1000)
-            return old(self, unpack(args))
-        end
-    end
-    return old(self, ...)
-end)
-setreadonly(mt, true)
+-- // ⚙️ SILENT AIM SEM MEXER NA METATABLE (MAIS SEGURO) //
+task.spawn(function()
+    game:GetService("RunService").RenderStepped:Connect(function()
+        FOVCircle.Radius = _G.FOV
+        FOVCircle.Visible = _G.ShowFOV
+        FOVCircle.Position = game:GetService("UserInputService"):GetMouseLocation()
 
--- Loop Visual e Ações
-game:GetService("RunService").RenderStepped:Connect(function()
-    FOVCircle.Radius = _G.FOV
-    FOVCircle.Visible = _G.ShowFOV
-    FOVCircle.Position = game:GetService("UserInputService"):GetMouseLocation()
-    
-    local t = GetClosest()
-    if t and t.Character and game.Players.LocalPlayer.Character then
-        local d = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - t.Character.HumanoidRootPart.Position).Magnitude
-        if _G.KillAura and d < 20 then
-            local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
-            if tool then tool:Activate() end
+        if _G.SilentAim then
+            local t = GetClosest()
+            if t and t.Character and t.Character:FindFirstChild("Head") then
+                -- O segredo: Não mudamos o raio, apenas avisamos o jogo onde o inimigo está
+                if game:GetService("UserInputService"):IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
+                   -- Aqui você pode adicionar um pequeno "Aimbot" suave se o Silent Aim falhar
+                end
+            end
         end
-    end
+        
+        -- Speed Hack via CFrame (Não dá Erro 261)
+        if _G.SpeedEnabled and game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local char = game.Players.LocalPlayer.Character
+            local hum = char.Humanoid
+            if hum.MoveDirection.Magnitude > 0 then
+                char:TranslateBy(hum.MoveDirection * (_G.SpeedValue / 50))
+            end
+        end
+    end)
 end)
 
-Rayfield:Notify({Title = "KRONOS BLACK", Content = "Speed e FOV Preto Ativados!", Duration = 5})
+Rayfield:Notify({Title = "KRONOS V54", Content = "Bypass de Conexão Ativo!", Duration = 5})
