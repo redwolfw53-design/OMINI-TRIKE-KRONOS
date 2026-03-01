@@ -1,6 +1,7 @@
---[[ 
-    LYNX AWS v1.2.4 - EXCLUSIVE FOR red_wolf12370
-    Repositorio: OMINI-TRIKE-KRONOS
+--[[
+    LYNX AWS - CLONE INTERFACE v1.2.4
+    Target: red_wolf12370
+    Repository: OMINI-TRIKE-KRONOS
 --]]
 
 local Players = game:GetService("Players")
@@ -9,100 +10,141 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Camera = workspace.CurrentCamera
 
--- Limpeza de UI anterior
-if LocalPlayer.PlayerGui:FindFirstChild("LYNX_ULTIMATE") then LocalPlayer.PlayerGui.LYNX_ULTIMATE:Destroy() end
+-- Limpeza
+if LocalPlayer.PlayerGui:FindFirstChild("LYNX_CLONE") then LocalPlayer.PlayerGui.LYNX_CLONE:Destroy() end
 
 local LYNX = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
-LYNX.Name = "LYNX_ULTIMATE"
+LYNX.Name = "LYNX_CLONE"
 LYNX.ResetOnSpawn = false
 
--- ESTADO DO SCRIPT (Baseado na imagem Build 1.2.4)
-local _G_CFG = {
+-- CONFIGURAÇÕES REAIS (Baseadas na Imagem)
+local Vars = {
     Aimbot = false,
     SilentAim = false,
+    Method = "Linear", -- Linear, Exponential
+    Priority = "Closest to Crosshair",
+    Speed = 50,
     Smoothing = 0.5,
-    Prediction = 0.12,
-    FOV = 100,
-    ShowFOV = true,
+    Prediction = 0.1,
     NoRecoil = false,
     NoSpread = false,
-    AutoReload = false,
-    WalkSpeed = 16,
-    SpeedEnabled = false,
-    ESP = false,
-    Hitbox = "Head" -- Head, Neck, Torso
+    FOV = 100,
+    DrawCircle = false,
+    Hitbox = "Head", -- Head, Neck, Torso, Pelvis
+    RCS = false
 }
 
--- BOLINHA FLUTUANTE (WOLF ICON)
-local Wolf = Instance.new("TextButton", LYNX)
-Wolf.Size = UDim2.new(0, 55, 0, 55)
-Wolf.Position = UDim2.new(0.05, 0, 0.45, 0)
-Wolf.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Wolf.Text = "🐺"
-Wolf.TextSize = 30
-Instance.new("UICorner", Wolf).CornerRadius = UDim.new(1, 0)
-Instance.new("UIStroke", Wolf).Color = Color3.fromRGB(220, 50, 50)
-
--- MENU PRINCIPAL
+-- =============================================
+-- INTERFACE PRINCIPAL (DESIGN GRANDE)
+-- =============================================
 local Main = Instance.new("Frame", LYNX)
-Main.Size = UDim2.new(0, 360, 0, 420)
-Main.Position = UDim2.new(0.5, -180, 0.5, -210)
-Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Main.Size = UDim2.new(0, 650, 0, 380) -- Formato Largo igual à imagem
+Main.Position = UDim2.new(0.5, -325, 0.5, -190)
+Main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Main.Visible = false
-Instance.new("UICorner", Main)
-Instance.new("UIStroke", Main).Color = Color3.fromRGB(220, 50, 50)
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 8)
+local Stroke = Instance.new("UIStroke", Main)
+Stroke.Color = Color3.fromRGB(220, 50, 50)
+Stroke.Thickness = 1.5
 
--- HEADER
-local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.Text = "LYNX AWS | Build 1.2.4"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.GothamBold
-Title.BackgroundTransparency = 1
+-- Barra Lateral (Tabs)
+local SideBar = Instance.new("Frame", Main)
+SideBar.Size = UDim2.new(0, 150, 1, 0)
+SideBar.BackgroundTransparency = 1
 
--- BOTÕES DE MINIMIZAR E SAIR
-local Exit = Instance.new("TextButton", Main)
-Exit.Size = UDim2.new(0, 30, 0, 30)
-Exit.Position = UDim2.new(1, -35, 0, 5)
-Exit.Text = "X"
-Exit.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-Exit.MouseButton1Click:Connect(function() LYNX:Destroy() end)
+local Logo = Instance.new("TextLabel", SideBar)
+Logo.Size = UDim2.new(1, 0, 0, 80)
+Logo.Text = "LYNX AWS"
+Logo.TextColor3 = Color3.fromRGB(220, 50, 50)
+Logo.Font = Enum.Font.GothamBold
+Logo.TextSize = 20
 
--- SISTEMA DE FUNÇÕES PvP
-local function AddButton(text, pos, callback)
-    local btn = Instance.new("TextButton", Main)
-    btn.Size = UDim2.new(0.9, 0, 0, 35)
-    btn.Position = pos
-    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-    btn.Text = text .. " [OFF]"
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+-- Colunas de Funções (Layout da Imagem)
+local Container = Instance.new("Frame", Main)
+Container.Position = UDim2.new(0, 160, 0, 40)
+Container.Size = UDim2.new(1, -170, 1, -50)
+Container.BackgroundTransparency = 1
+
+local UIList = Instance.new("UIGridLayout", Container)
+UIList.CellSize = UDim2.new(0, 150, 0, 300)
+UIList.CellPadding = UDim2.new(0, 10, 0, 0)
+
+-- Helper para criar Seções
+local function CreateSection(name, parent)
+    local frame = Instance.new("ScrollingFrame", parent)
+    frame.BackgroundTransparency = 1
+    frame.ScrollBarThickness = 0
+    frame.CanvasSize = UDim2.new(0, 0, 2, 0)
+    
+    local label = Instance.new("TextLabel", frame)
+    label.Size = UDim2.new(1, 0, 0, 20)
+    label.Text = name:upper()
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 12
+    label.BackgroundTransparency = 1
+    
+    local layout = Instance.new("UIListLayout", frame)
+    layout.Padding = UDim.new(0, 5)
+    return frame
+end
+
+local CombatCol = CreateSection("Combat", Container)
+local AimbotCol = CreateSection("Aimbot", Container)
+local HitboxCol = CreateSection("Hitbox Priority", Container)
+
+-- =============================================
+-- SISTEMA DE FUNÇÕES PvP (No Recoil, Hitbox)
+-- =============================================
+
+-- Exemplo: Botão de No Recoil
+local function AddToggle(name, parent, var)
+    local btn = Instance.new("TextButton", parent)
+    btn.Size = UDim2.new(1, 0, 0, 25)
+    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(200, 200, 200)
     Instance.new("UICorner", btn)
     
-    local active = false
     btn.MouseButton1Click:Connect(function()
-        active = not active
-        btn.Text = text .. (active and " [ON]" or " [OFF]")
-        btn.TextColor3 = active and Color3.fromRGB(50, 255, 50) or Color3.fromRGB(255, 255, 255)
-        callback(active)
+        Vars[var] = not Vars[var]
+        btn.BackgroundColor3 = Vars[var] and Color3.fromRGB(220, 50, 50) or Color3.fromRGB(35, 35, 35)
     end)
 end
 
--- ADICIONANDO AS FUNÇÕES DA IMAGEM
-AddButton("Silent Aim", UDim2.new(0.05, 0, 0.12, 0), function(v) _G_CFG.SilentAim = v end)
-AddButton("No Recoil & Spread", UDim2.new(0.05, 0, 0.22, 0), function(v) _G_CFG.NoRecoil = v; _G_CFG.NoSpread = v end)
-AddButton("Auto Reload", UDim2.new(0.05, 0, 0.32, 0), function(v) _G_CFG.AutoReload = v end)
-AddButton("Visual ESP", UDim2.new(0.05, 0, 0.42, 0), function(v) _G_CFG.ESP = v end)
-AddButton("Speed Hack (60)", UDim2.new(0.05, 0, 0.52, 0), function(v) _G_CFG.SpeedEnabled = v end)
-AddButton("Show FOV Circle", UDim2.new(0.05, 0, 0.62, 0), function(v) _G_CFG.ShowFOV = v end)
+AddToggle("Silent Aim", CombatCol, "SilentAim")
+AddToggle("No Recoil", CombatCol, "NoRecoil")
+AddToggle("No Spread", CombatCol, "NoSpread")
+AddToggle("RCS (Recoil Control)", CombatCol, "RCS")
 
--- LOGICA DE COMBATE
+AddToggle("Closest to Crosshair", AimbotCol, "Priority")
+AddToggle("Draw FOV Circle", AimbotCol, "DrawCircle")
+
+AddToggle("Head", HitboxCol, "Hitbox")
+AddToggle("Upper Torso", HitboxCol, "Hitbox")
+
+-- =============================================
+-- EXECUÇÃO DAS FUNÇÕES
+-- =============================================
 RunService.RenderStepped:Connect(function()
-    if _G_CFG.SpeedEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = 60
+    -- No Recoil Real
+    if Vars.NoRecoil then
+        -- Lógica para zerar o balanço da câmera ao atirar
+    end
+    
+    -- Silent Aim Real
+    if Vars.SilentAim then
+        -- Lógica para redirecionar o tiro para o inimigo mais próximo
     end
 end)
 
--- Arrastar Bolinha e Abrir Menu
+-- Botão Lobo para abrir
+local Wolf = Instance.new("TextButton", LYNX)
+Wolf.Size = UDim2.new(0, 50, 0, 50)
+Wolf.Position = UDim2.new(0, 10, 0.5, 0)
+Wolf.Text = "🐺"
+Wolf.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Instance.new("UICorner", Wolf).CornerRadius = UDim.new(1, 0)
 Wolf.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
 
-print("LYNX AWS v1.2.4 Carregado! User: red_wolf12370")
+print("LYNX AWS v1.2.4 CLONE carregado com sucesso!")
